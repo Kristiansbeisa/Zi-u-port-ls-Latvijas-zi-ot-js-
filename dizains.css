@@ -1,0 +1,48 @@
+.small-card-img-format {
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.small-card-img-format img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 0.5rem;
+}
+
+.big-card-img-format {
+    width: 100%;
+    height: 350px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.big-card-img-format img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 0.5rem;
+}
+
+.fullscreen-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #f8f9fa;
+    z-index: 10;
+}
+
+.fullscreen-menu .nav-link {
+    font-size: 1.5rem;
+    padding: 1rem 0;
+}

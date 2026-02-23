@@ -1,4 +1,6 @@
 <?php
+include 'funkcijas.php';
+
 $host = "localhost";
 $db   = "beisadb";
 $user = "root"; 
@@ -35,6 +37,7 @@ $Perm = isset($_SESSION['Loma']) && in_array($_SESSION['Loma'], ['Darbinieks', '
 if ($Perm) {
     $kategorijas = array_merge($kategorijas, [
         'Latvijā',
+        'Laika ziņas',
         'Sports',
         'Politika',
         'Ārzmēs'
@@ -55,51 +58,9 @@ if ($Perm) {
 
 <body>
 
-  <nav class="navbar navbar-light bg-light sticky-top">
-    <div class="container-fluid">
-
-      <a class="navbar-brand" href="#">Logo</a>
-
-      <ul class="navbar-nav flex-row gap-4 d-none d-md-flex position-absolute start-50 translate-middle-x">
-        <li class="nav-item">
-          <a class="nav-link active" href="index.php">Jaunākais</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="latvija.php">Latvijā</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="sports.php">Sports</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="politika.php">Politika</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="arzemes.php">Ārzemēs</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="lietotaju_zinas.php">Lietotāju ziņas</a>
-        </li>
-      </ul>
-
-      <button class="navbar-toggler d-md-none" type="button" data-mdb-collapse-init data-mdb-target="#navbarMenu"
-        aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation" style="z-index:9999;">
-        <i class="fas fa-bars"></i>
-      </button>
-
-    </div>
-  </nav>
-
-  <!-- mobilais menu -->
-  <div class="collapse fullscreen-menu d-md-none" id="navbarMenu">
-    <ul class="navbar-nav text-center mt-5">
-      <li class="nav-item"><a class="nav-link active" href="#">Sākums</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Kategorija1</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Kategorija2</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Kategorija3</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Kategorija4</a></li>
-    </ul>
-  </div>
-  <!-- mobilais menu -->
+  <?php
+        navbar();
+    ?>
 
     <style>
         .fullscreen-menu {
@@ -166,12 +127,13 @@ if ($Perm) {
                                 <option value="<?= $kat ?>"><?= $kat ?></option>
                             <?php endforeach; ?>
                         </select>
-
-                        <select class="form-select" name="svarigums" id="account" required="">
+                        <?php if($Perm): ?>
+                        <select class="form-select mb-5" name="svarigums" id="account" required="">
                             <option value="">Svarigums</option>
                             <option value="0">0</option>
                             <option value="1">1</option>
                         </select>
+                        <?php endif; ?>
 
                         <button type="submit" class="btn btn-primary">Saglabāt</button>
                     </form>

@@ -1,6 +1,5 @@
 <?php
 require 'conf.php';
-require 'log.php';
 
 if (!isset($_SESSION['Liet_ID'])) {
     header("Location: login.php");

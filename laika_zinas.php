@@ -1,13 +1,16 @@
 <?php
-$category = 'politika';
+
+$category = 'laika_zinas';
 include 'conf.php';
 include 'funkcijas.php';
 
+
 $stmt = $pdo->query("
-    SELECT z.Nosaukums, z.Teksts, l.Vards, z.Izveidots, z.Bilde, z.Svarigums, z.Kategorija, z.ID, z.Liet_ID
+    SELECT z.ID, z.Nosaukums, z.Teksts, l.Vards, z.Liet_ID,
+           z.Izveidots, z.Bilde, z.Svarigums, z.Kategorija
     FROM zinas z
     JOIN lietotaji l ON z.Liet_ID = l.ID
-    WHERE Kategorija = 'Politika'
+    WHERE Kategorija = 'Laika Ziņas'
     ORDER BY z.Izveidots DESC
 ");
 $posts = $stmt->fetchAll();
@@ -32,6 +35,8 @@ $posts = $stmt->fetchAll();
         show_zinas($posts);
         show_terzetava();
     ?>
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/mdb-ui-kit@9.2.0/js/mdb.umd.min.js"></script>
 </body>
