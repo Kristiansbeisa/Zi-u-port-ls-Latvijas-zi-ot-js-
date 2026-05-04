@@ -39,6 +39,7 @@ $posts = $stmt->fetchAll();
     ?>
 
     <script src="https://cdn.jsdelivr.net/npm/mdb-ui-kit@9.2.0/js/mdb.umd.min.js"></script>
+    <script src="js/mdb.min.js"></script>
 </body>
 
 </html>

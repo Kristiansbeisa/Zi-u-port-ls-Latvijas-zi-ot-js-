@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dzest_atsauksmi'])) {
     $stmt->execute([$atsauksmes_id]);
     $atsauksme = $stmt->fetch();
 
-    if ($atsauksme && isset($_SESSION['Liet_ID']) && ($_SESSION['Liet_ID'] === $atsauksme['Liet_ID'] || $_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators' || $_SESSION['Liet_ID'] === $atsauksme['zinas_Liet_ID'])) {
+    if ($atsauksme && isset($_SESSION['Liet_ID']) && ($_SESSION['Liet_ID'] == $atsauksme['Liet_ID'] || $_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators' || $_SESSION['Liet_ID'] == $atsauksme['zinas_Liet_ID'])) {
       $stmt = $pdo->prepare("DELETE FROM atsauksmes WHERE ID = ?");
       $stmt->execute([$atsauksmes_id]);
     }
@@ -61,6 +61,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dzest_atsauksmi'])) {
     exit;
 }
 // Atsauksmes dzēšana
+
+// Atsauksmes rediģēšana
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rediget_atsauksmi'])) {
+
+    $atsauksmes_id = (int)$_POST['rediget_atsauksmi'];
+    $teksts = $_POST['red_ats_input'];
+
+    $stmt = $pdo->prepare("SELECT a.Liet_ID, z.Liet_ID as zinas_Liet_ID FROM atsauksmes a
+    JOIN zinas z ON z.ID = a.Zinas_ID
+    WHERE a.ID = ?");
+    $stmt->execute([$atsauksmes_id]);
+    $atsauksme = $stmt->fetch();
+
+    if ($atsauksme && isset($_SESSION['Liet_ID']) && ($_SESSION['Liet_ID'] == $atsauksme['Liet_ID'])) {
+        $stmt = $pdo->prepare("UPDATE atsauksmes SET teksts = ? WHERE ID = ?");
+        $stmt->execute([$teksts, $atsauksmes_id]);
+    }
+
+    header("Location: zina.php?id=" . $id);
+    exit;
+}
+// Atsauksmes rediģēšana
 
 // Atsauksmes pievienošana
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['teksts'])) {
@@ -80,17 +102,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['teksts'])) {
 }
 // Atsauksmes pievienošana
 
+// Vērtējuma pievienošana
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['vertejums'] === '1') {
+
+    $liet_id = $_SESSION['Liet_ID'];
+    $zinas_id = $id;
+    $vertejums = $_POST['vertiba'];
+
+    if ($vertejums < 1 || $vertejums > 5) {
+        die("Nederīgs vērtējums");
+    }
+
+    $stmt = $pdo->prepare("SELECT * FROM zinu_vertejumi 
+    WHERE Liet_ID=? AND Zinas_id=?");
+    $stmt->execute([$liet_id, $zinas_id]);
+
+    if (!$stmt->fetch()) {
+        $stmt = $pdo->prepare("INSERT INTO zinu_vertejumi (Liet_ID, Zinas_id, Vertejums) VALUES (?, ?, ?)");
+        $stmt->execute([$liet_id, $zinas_id, $vertejums]);
+    }
+
+    $stmt = $pdo->prepare("SELECT AVG(Vertejums) AS avg, COUNT(*) AS count
+    FROM zinu_vertejumi
+    WHERE Zinas_id = ?
+");
+$stmt->execute([$zinas_id]);
+$dati = $stmt->fetch();
+
+$stmt = $pdo->prepare("UPDATE zinas 
+    SET videjais_vertejums = ?, vertejumu_skaits = ?
+    WHERE ID = ?
+");
+$stmt->execute([$dati['avg'], $dati['count'], $zinas_id]);
+
+    header("Location: zina.php?id=" . $zinas_id);
+    exit();
+}
+// Vērtējuma pievienošana
+
+
 $stmt = $pdo->prepare("SELECT Nosaukums, Teksts, Bilde, Izveidots, Kategorija 
                         FROM zinas 
                         WHERE ID = ?");
 $stmt->execute([$id]);
-$zina = $stmt->fetch(); 
+$zina = $stmt->fetch();
 
 if (!$zina) {
     die("Ziņa neeksistē");
 }
 ?>
 
+<?php rediget_atsauksmi(); ?>
+<script>
+
+function openModal(id, teksts) {
+    document.getElementById('red_ats_input').value = teksts;
+    document.getElementById('modal_red_ats_id').value = id;
+
+    let modal = new mdb.Modal(document.getElementById('red_ats_modal'));
+    modal.show();
+}
+</script>
 <!-- Lapas saturs !-->
   <div class="container mt-5 pt-5">
 
@@ -111,6 +183,31 @@ if (!$zina) {
         <img src="<?= htmlspecialchars($zina['Bilde']) ?>" style="width:100%;">
         <?php endif; ?>
     </div>
+
+    <!-- Vērtējums !-->
+    <div class="container mt-5 mb-5" style="width:70%;">
+        <form method="POST">
+            <input type="hidden" name="vertejums" value="1">
+
+            <div class="rating">
+                <input type="radio" name="vertiba" value="1" id="star5" onclick="this.form.submit()">
+                <label for="star5">★</label>
+
+                <input type="radio" name="vertiba" value="2" id="star4" onclick="this.form.submit()">
+                <label for="star4">★</label>
+
+                <input type="radio" name="vertiba" value="3" id="star3" onclick="this.form.submit()">
+                <label for="star3">★</label>
+
+                <input type="radio" name="vertiba" value="4" id="star2" onclick="this.form.submit()">
+                <label for="star2">★</label>
+
+                <input type="radio" name="vertiba" value="5" id="star1" onclick="this.form.submit()">
+                <label for="star1">★</label>
+            </div>
+        </form>
+    </div>
+    <!-- Vērtējums !-->
     
     <div class="container" style="width:80%;">
         <div class="text-black">
@@ -151,8 +248,8 @@ $atsauksmes = $stmt->fetchAll();
                     <?php
            
 
-if (isset($_SESSION['Liet_ID']) && ($_SESSION['Liet_ID'] === $a['Liet_ID'] || $_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators' || $_SESSION['Liet_ID'] === $a['zinas_Liet_ID'])):
-?>
+if (isset($_SESSION['Liet_ID']) && (($_SESSION['Liet_ID'] == $a['Liet_ID']) || $_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators' || $_SESSION['Liet_ID'] == $a['zinas_Liet_ID'])):?>
+<div class="d-flex justify-content-start gap-3">
     <form method="post" class="mt-2"
           onsubmit="return confirm('Vai tiešām vēlaties dzēst atsauksmi?');">
         <input type="hidden" name="dzest_atsauksmi"
@@ -162,6 +259,12 @@ if (isset($_SESSION['Liet_ID']) && ($_SESSION['Liet_ID'] === $a['Liet_ID'] || $_
             Dzēst
         </button>
     </form>
+    <?php if (isset($_SESSION['Liet_ID']) && ($_SESSION['Liet_ID'] == $a['Liet_ID']) && ($_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators')):?>
+        <div class="mt-2">
+            <button class="btn btn-sm btn-primary red-btn" data-id="<?= $a['atsauksmesID'] ?>" data-teksts="<?= htmlspecialchars($a['teksts'], ENT_QUOTES) ?>">Rediģēt</button>
+        </div>
+    <?php endif; ?>
+</div>
 <?php endif; ?>
 
                 </div>
@@ -201,6 +304,17 @@ if (isset($_SESSION['Liet_ID']) && ($_SESSION['Liet_ID'] === $a['Liet_ID'] || $_
   <?php else: ?>
   <p><a href="register.php">Reģistrācija</a> | <a href="login.php">Pieslēgties</a></p>
   <?php endif; ?>
+
+  <script>
+    document.querySelectorAll('.red-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        openModal(
+            this.dataset.id,
+            this.dataset.teksts
+        );
+    });
+});  
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/mdb-ui-kit@9.2.0/js/mdb.umd.min.js"></script>
 </body>

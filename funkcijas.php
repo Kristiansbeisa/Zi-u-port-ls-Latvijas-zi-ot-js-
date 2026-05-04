@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dzest_zinu'])) {
 
     if ($zina && isset($_SESSION['Liet_ID'])) {
 
-        if (($_SESSION['Liet_ID'] == $zina['Liet_ID']) || ($_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators')) {
+        if (($_SESSION['Liet_ID'] == $zina['Liet_ID']) || ($_SESSION['Loma'] === 'Darbinieks' && $category === 'lietotaju_zinas') || $_SESSION['Loma'] === 'Administrators') {
 
             $stmt = $pdo->prepare("DELETE FROM atsauksmes WHERE Zinas_ID = ?");
             $stmt->execute([$zinas_id]);
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dzest_zinu'])) {
 
 function navbar($num = null, $kat = null) {
     echo '
-    <nav class="navbar navbar-light bg-light sticky-top">
+    <nav class="navbar navbar-light bg-light sticky-top" style="z-index:999;">
       <div class="container-fluid">
 
         <a class="navbar-brand" href="index.php">Logo</a>
@@ -42,28 +42,12 @@ function navbar($num = null, $kat = null) {
         </ul>
     ';
 
-    echo '<div class="d-none d-md-flex align-items-center gap-2">';
+    echo '<button class="btn m-0 p-0" type="button" data-mdb-collapse-init data-mdb-target="#sidenav"
+        aria-expanded="false" aria-controls="sidenav" style="z-index: 9; box-shadow: none; opacity: 1;">
+        <i class="fas fa-bars" style="color: rgb(0, 0, 0); font-size: 28px;"></i>
+    </button>
 
-    if (
-        (isset($_SESSION['Liet_ID']) && in_array($_SESSION['Loma'], ['Darbinieks', 'Administrators'])) 
-        || ($kat === "lietotaju_zinas" && isset($_SESSION['Liet_ID']))
-    ) {
-        echo '<a href="pievienot.php" class="btn d-md-flex">Pievienot</a>';
-    }
-    if ($num === 1) {
-      echo '<button type="button" class="btn btn-primary" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#tērzētava">Tērzētava</button>';
-    }
-    if (isset($_SESSION['Vards'])) {
-        echo '
-            <span>'.htmlspecialchars($_SESSION['Vards']).'</span>
-            <a href="logout.php" class="btn btn-outline-danger btn-sm">Iziet</a>
-        ';
-    } else {
-        echo '
-            <a href="register.php" class="btn btn-outline-secondary btn-sm">Reģistrācija</a>
-            <a href="login.php" class="btn btn-primary btn-sm">Pieslēgties</a>
-        ';
-    }
+    ';
 
     echo '</div>';
 
@@ -80,6 +64,36 @@ function navbar($num = null, $kat = null) {
 
       </div>
     </nav>
+
+
+<!-- Sidebar -->
+<div id="sidenav" class="collapse position-fixed top-0 end-0 h-100 sidenav-animated" style="width: 394px; z-index: 10; font-size: 18px; overflow-y: auto; background-color: white;">
+  <div class="list-group list-group-flush mx-3" style="margin-top: 100px;">';
+    if (
+        (isset($_SESSION['Liet_ID']) && in_array($_SESSION['Loma'], ['Darbinieks', 'Administrators'])) 
+        || ($kat === "lietotaju_zinas" && isset($_SESSION['Liet_ID']))
+    ) {
+        echo '<a href="pievienot.php" class="btn d-md-flex">Pievienot</a>';
+    }
+    if ($num === 1) {
+      echo '<button type="button" class="btn btn-primary" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#tērzētava">Tērzētava</button>';
+    }
+    if (isset($_SESSION['Vards'])) {
+        echo '
+            <span>'.htmlspecialchars($_SESSION['Vards']).''.htmlspecialchars($_SESSION['Liet_ID']).''.htmlspecialchars($_SESSION['Loma']).'</span>
+            <a href="logout.php" class="btn btn-outline-danger btn-sm">Iziet</a>
+        ';
+    } else {
+        echo '
+            <a href="register.php" class="btn btn-outline-secondary btn-sm">Reģistrācija</a>
+            <a href="login.php" class="btn btn-primary btn-sm">Pieslēgties</a>
+        ';
+    }
+    echo '
+  </div>
+</div>
+<!-- Sidebar -->
+
 
     <!-- mobile menu -->
     <div class="collapse fullscreen-menu d-md-none" id="navbarMenu">
@@ -158,12 +172,18 @@ foreach ($posts as $post):
                         </h6>
                         <?php
                           if (isset($_SESSION['Liet_ID']) &&
-                            ($_SESSION['Liet_ID'] == $post['Liet_ID'] || $_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators')):
+                            ($_SESSION['Liet_ID'] == $post['Liet_ID'] || ($_SESSION['Loma'] === 'Darbinieks' && $post['Kategorija'] === 'Lietotāju ziņas') || $_SESSION['Loma'] === 'Administrators')):
                             ?>
-                            <form class="text-end" method="post" onsubmit="return confirm('Vai tiešām dzēst šo ziņu?');">
-                              <input type="hidden" name="dzest_zinu" value="<?= $post['ID'] ?>">
-                              <button type="submit" class="btn btn-sm btn-danger mt-2">Dzēst</button>
-                            </form>
+                            <div class="d-flex justify-content-end gap-3">
+                                <form class="text-end" method="post" onsubmit="return confirm('Vai tiešām dzēst šo ziņu?');">
+                                    <input type="hidden" name="dzest_zinu" value="<?= $post['ID'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-danger mt-2">Dzēst</button>
+                                </form>
+                                <form class="text-end" method="get" action="pievienot.php">
+                                    <input type="hidden" name="id" value="<?= $post['ID'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-primary mt-2">Rediģēt</button>
+                                </form>
+                            </div>
                           <?php endif; ?>
                     </div>
 
@@ -206,12 +226,18 @@ foreach ($posts as $post):
                         </h6>
                         <?php
                           if (isset($_SESSION['Liet_ID']) &&
-                            ($_SESSION['Liet_ID'] == $post['Liet_ID'] || $_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators')):
+                            ($_SESSION['Liet_ID'] == $post['Liet_ID'] || ($_SESSION['Loma'] === 'Darbinieks' && $post['Kategorija'] === 'Lietotāju ziņas') || $_SESSION['Loma'] === 'Administrators')):
                             ?>
-                            <form class="text-end" method="post" onsubmit="return confirm('Vai tiešām dzēst šo ziņu?');">
-                              <input type="hidden" name="dzest_zinu" value="<?= $post['ID'] ?>">
-                              <button type="submit" class="btn btn-sm btn-danger mt-2">Dzēst</button>
-                            </form>
+                            <div class="d-flex justify-content-end gap-3">
+                                <form class="text-end" method="post" onsubmit="return confirm('Vai tiešām dzēst šo ziņu?');">
+                                    <input type="hidden" name="dzest_zinu" value="<?= $post['ID'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-danger mt-2">Dzēst</button>
+                                </form>
+                                <form class="text-end" method="get" action="pievienot.php">
+                                    <input type="hidden" name="id" value="<?= $post['ID'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-primary mt-2">Rediģēt</button>
+                                </form>
+                            </div>
                           <?php endif; ?>
                     </div>
                 </div>
@@ -266,4 +292,47 @@ function show_terzetava() {
 </div>
 <?php
 }
+
+function rediget_atsauksmi() {
+  ?>
+<div class="modal fade" id="red_ats_modal" tabindex="-1" aria-labelledby="red_ats_modal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="height:90%;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="red_ats_modal">Rediģēt atsauksmi</h5>
+        <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post">
+        <input type="hidden" name="rediget_atsauksmi" id="modal_red_ats_id">
+      <div class="modal-body" id="modal_red_ats_body" style="overflow-Y: auto;">
+        <?php if (
+    isset($_SESSION['Liet_ID'])
+): ?>
+            <div class="col-9">
+                <div class="form-outline mb-4" data-mdb-input-initialized="true" data-mdb-input-init="">
+                    <textarea id="red_ats_input" class="form-control" name="red_ats_input" rows="4" required></textarea>
+                    <label class="form-label" for="red_ats_input" style="margin-left: 0px;">Ievadi tekstu</label>
+                    <div class="form-notch">
+                        <div class="form-notch-leading" style="width: 9px;"></div>
+                        <div class="form-notch-middle" style="width: 112px;"></div>
+                        <div class="form-notch-trailing"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <button class="btn btn-success">Saglabāt</button>
+            </div>
+            <?php else: ?>
+                <div class="col-12">
+                    <h5 class="text-center"><a href="login.php">Piesakies kontā!</a></h5>
+                </div>
+            <?php endif; ?>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+<?php
+}
+
 ?>
