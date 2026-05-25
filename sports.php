@@ -32,6 +32,10 @@ $posts = $stmt->fetchAll();
         navbar(1);
         show_zinas($posts);
         show_terzetava();
+        if (isset($_SESSION['positive_alert_text'])) {
+            positive_alert('index', $_SESSION['positive_alert_text']);
+            unset($_SESSION['positive_alert_text']);
+        }
     ?>
 
     <script src="https://cdn.jsdelivr.net/npm/mdb-ui-kit@9.2.0/js/mdb.umd.min.js"></script>

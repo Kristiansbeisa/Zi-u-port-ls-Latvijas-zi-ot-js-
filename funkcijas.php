@@ -20,25 +20,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dzest_zinu'])) {
         }
     }
 
+    $_SESSION['positive_alert_text'] = 'Ziņa tika dzēsta!';
+
     header("Location: ".$_SERVER['REQUEST_URI']);
     exit;
 }
 
 function navbar($num = null, $kat = null) {
     echo '
-    <nav class="navbar navbar-light bg-light sticky-top" style="z-index:999;">
-      <div class="container-fluid">
+    <nav class="navbar navbar-light bg-light sticky-top shadow-4-strong" style="z-index:999;">
+      <div class="container-fluid" id="nav-ul-links">
 
-        <a class="navbar-brand" href="index.php">Logo</a>
+        <a class="navbar-brand me-0" href="index.php"><img src="LZ logo.png" style="height: 20px;"></a>
+        
+        <ul class="navbar-nav flex-row gap-4 d-none d-md-flex justify-content-center" style="height:40px; width:90%;">
+        <form method="GET" action="index.php" style="width:30%;">
+            <div class="input-group">
+                <div class="form-outline" data-mdb-input-init>
+                    <input type="search" id="form1" class="form-control" value="'.($_GET['meklet_zinas'] ?? '').'" name="meklet_zinas" />
+                    <label class="form-label" for="form1">Meklēt ziņas</label>
+                </div>
+                <button type="submit" class="btn btn-primary" data-mdb-ripple-init>
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
 
-        <ul class="navbar-nav flex-row gap-4 d-none d-md-flex">
-          <li class="nav-item"><a class="nav-link" href="index.php">Jaunākais</a></li>
-          <li class="nav-item"><a class="nav-link" href="latvija.php">Latvijā</a></li>
-          <li class="nav-item"><a class="nav-link" href="laika_zinas.php">Laika ziņas</a></li>
-          <li class="nav-item"><a class="nav-link" href="sports.php">Sports</a></li>
-          <li class="nav-item"><a class="nav-link" href="politika.php">Politika</a></li>
-          <li class="nav-item"><a class="nav-link" href="arzemes.php">Ārzemēs</a></li>
-          <li class="nav-item"><a class="nav-link" href="lietotaju_zinas.php">Lietotāju ziņas</a></li>
+        
+          <li class="nav-item"><a class="nav-link" href="index.php" style="color: rgb(0 0 0 / 90%) !important;">Jaunākais</a></li>
+          <li class="nav-item"><a class="nav-link" href="latvija.php" style="color: rgb(0 0 0 / 90%) !important;">Latvijā</a></li>
+          <li class="nav-item"><a class="nav-link" href="laika_zinas.php" style="color: rgb(0 0 0 / 90%) !important;">Laika ziņas</a></li>
+          <li class="nav-item"><a class="nav-link" href="sports.php" style="color: rgb(0 0 0 / 90%) !important;">Sports</a></li>
+          <li class="nav-item"><a class="nav-link" href="politika.php" style="color: rgb(0 0 0 / 90%) !important;">Politika</a></li>
+          <li class="nav-item"><a class="nav-link" href="arzemes.php" style="color: rgb(0 0 0 / 90%) !important;">Ārzemēs</a></li>
+          <li class="nav-item"><a class="nav-link" href="lietotaju_zinas.php" style="color: rgb(0 0 0 / 90%) !important;">Lietotāju ziņas</a></li>
         </ul>
     ';
 
@@ -52,14 +67,17 @@ function navbar($num = null, $kat = null) {
     echo '</div>';
 
     echo '
-        <button class="navbar-toggler d-md-none" type="button"
+        <div class="container-fluid d-flex" id="mobile-nav-ul-links">
+
+        <a class="navbar-brand me-0" href="index.php"><img src="LZ logo.png" style="height: 20px;"></a>
+        <button class="navbar-toggler" type="button"
           data-mdb-collapse-init
           data-mdb-target="#navbarMenu"
           aria-controls="navbarMenu"
           aria-expanded="false"
           aria-label="Toggle navigation"
           style="z-index:9999;">
-          <i class="fas fa-bars"></i>
+          <i class="fas fa-bars" style="color: rgb(0, 0, 0); font-size: 28px;"></i>
         </button>
 
       </div>
@@ -67,26 +85,30 @@ function navbar($num = null, $kat = null) {
 
 
 <!-- Sidebar -->
-<div id="sidenav" class="collapse position-fixed top-0 end-0 h-100 sidenav-animated" style="width: 394px; z-index: 10; font-size: 18px; overflow-y: auto; background-color: white;">
+<div id="sidenav" class="collapse position-fixed top-0 end-0 h-100 sidenav-animated shadow-6-strong" style="width: 394px; z-index: 10; font-size: 18px; overflow-y: auto; background-color: white;">
   <div class="list-group list-group-flush mx-3" style="margin-top: 100px;">';
     if (
         (isset($_SESSION['Liet_ID']) && in_array($_SESSION['Loma'], ['Darbinieks', 'Administrators'])) 
         || ($kat === "lietotaju_zinas" && isset($_SESSION['Liet_ID']))
     ) {
-        echo '<a href="pievienot.php" class="btn d-md-flex">Pievienot</a>';
+        echo '<a href="pievienot.php" class="btn btn-success mb-3">Pievienot ziņu</a>';
     }
     if ($num === 1) {
-      echo '<button type="button" class="btn btn-primary" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#tērzētava">Tērzētava</button>';
+      echo '<button type="button" class="btn btn-primary mb-3" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#tērzētava">Tērzētava</button>';
     }
-    if (isset($_SESSION['Vards'])) {
+    if (!isset($_SESSION['Vards'])) {
         echo '
-            <span>'.htmlspecialchars($_SESSION['Vards']).''.htmlspecialchars($_SESSION['Liet_ID']).''.htmlspecialchars($_SESSION['Loma']).'</span>
-            <a href="logout.php" class="btn btn-outline-danger btn-sm">Iziet</a>
+            <a href="register.php" class="btn btn-warning mb-3">Reģistrācija</a>
+            <a href="login.php" class="btn btn-success mb-3">Pieslēgties</a>
         ';
     } else {
         echo '
-            <a href="register.php" class="btn btn-outline-secondary btn-sm">Reģistrācija</a>
-            <a href="login.php" class="btn btn-primary btn-sm">Pieslēgties</a>
+            <a href="index.php?savas_zinas=1" class="btn btn-warning mb-3">Manas ziņas</a>';
+                if (!isset($_SESSION['Abonements'])) {
+                echo '<a href="abonementi.php" class="btn btn-info mb-3">Abonements</a>';
+                }
+            echo '
+            <a href="logout.php" style="font-weight:bold;" class="btn btn-outline-danger mb-3"><i class="fa-solid fa-arrow-right-from-bracket"></i> Iziet</a>
         ';
     }
     echo '
@@ -96,39 +118,61 @@ function navbar($num = null, $kat = null) {
 
 
     <!-- mobile menu -->
-    <div class="collapse fullscreen-menu d-md-none" id="navbarMenu">
-      <ul class="navbar-nav text-center mt-5">
-        <li class="nav-item"><a class="nav-link" style="font-size:20px;" href="index.php">Jaunākais</a></li>
-        <li class="nav-item"><a class="nav-link" style="font-size:20px;" href="latvija.php">Latvijā</a></li>
-        <li class="nav-item"><a class="nav-link" style="font-size:20px;" href="laika_zinas.php">Laika ziņas</a></li>
-        <li class="nav-item"><a class="nav-link" style="font-size:20px;" href="sports.php">Sports</a></li>
-        <li class="nav-item"><a class="nav-link" style="font-size:20px;" href="politika.php">Politika</a></li>
-        <li class="nav-item"><a class="nav-link" style="font-size:20px;" href="arzemes.php">Ārzemēs</a></li>
-        <li class="nav-item"><a class="nav-link" style="font-size:20px;" href="lietotaju_zinas.php">Lietotāju ziņas</a></li>
-      </ul>
+    <div class="collapse fullscreen-menu" id="navbarMenu">
+      <ul class="navbar-nav text-center mt-5 pt-4">
+        <li class="nav-item" style="line-height: 0.4;"><a class="nav-link" style="font-size:20px;" href="index.php" style="color: rgb(0 0 0 / 80%) !important;">Jaunākais</a></li>
+        <li class="nav-item" style="line-height: 0.4;"><a class="nav-link" style="font-size:20px;" href="latvija.php" style="color: rgb(0 0 0 / 80%) !important;">Latvijā</a></li>
+        <li class="nav-item" style="line-height: 0.4;"><a class="nav-link" style="font-size:20px;" href="laika_zinas.php" style="color: rgb(0 0 0 / 80%) !important;">Laika ziņas</a></li>
+        <li class="nav-item" style="line-height: 0.4;"><a class="nav-link" style="font-size:20px;" href="sports.php" style="color: rgb(0 0 0 / 80%) !important;">Sports</a></li>
+        <li class="nav-item" style="line-height: 0.4;"><a class="nav-link" style="font-size:20px;" href="politika.php" style="color: rgb(0 0 0 / 80%) !important;">Politika</a></li>
+        <li class="nav-item" style="line-height: 0.4;"><a class="nav-link" style="font-size:20px;" href="arzemes.php" style="color: rgb(0 0 0 / 80%) !important;">Ārzemēs</a></li>
+        <li class="nav-item" style="line-height: 0.4;"><a class="nav-link" style="font-size:20px;" href="lietotaju_zinas.php" style="color: rgb(0 0 0 / 80%) !important;">Lietotāju ziņas</a></li>
+        
+        <div class="row mt-2 d-flex justify-content-center">
+            <form method="GET" action="index.php" class="mb-0" style="width:70%;">
+                <div class="input-group">
+                    <div class="form-outline" data-mdb-input-init>
+                        <input type="search" id="form1" class="form-control" value="'.($_GET['meklet_zinas'] ?? '').'" name="meklet_zinas" />
+                    <label class="form-label" for="form1">Meklēt ziņas</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-mdb-ripple-init>
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        </ul>
 
       <div class="text-center mt-4">
       ';
-      if ($num === 1) {
-        echo'<button type="button" class="btn btn-primary mb-2" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#tērzētava">Tērzētava</button>';
-      }
-      echo'
-    ';
 
     if (isset($_SESSION['Vards'])) {
       if (
         (isset($_SESSION['Liet_ID']) && in_array($_SESSION['Loma'], ['Darbinieks', 'Administrators'])) 
         || ($kat === "lietotaju_zinas" && isset($_SESSION['Liet_ID']))
     ) {
-        echo '<p><a href="pievienot.php" class="btn">Pievienot</a></p>';
+        echo '<p class="mb-2"><a href="pievienot.php" class="btn btn-success" style="width:50%;">Pievienot ziņu</a></p>';
     }
-        echo '
-            <p><a href="logout.php" class="btn btn-outline-danger">Iziet</a></p>
-        ';
     } else {
         echo '
-            <a href="register.php" class="btn btn-outline-secondary mb-2">Reģistrācija</a><br>
-            <a href="login.php" class="btn btn-primary">Pieslēgties</a>
+            <a href="register.php" class="btn btn-warning mb-2" style="width:50%;">Reģistrācija</a><br>
+            <a href="login.php" class="btn btn-success mb-2" style="width:50%;">Pieslēgties</a>
+        ';
+    }
+
+    if ($num === 1) {
+        echo'<button type="button" class="btn btn-primary mb-2" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#tērzētava" style="width:50%;">Tērzētava</button>';
+    }
+
+    if (isset($_SESSION['Vards'])) {
+        echo '
+            <p class="mb-2"><a href="index.php?savas_zinas=1" class="btn btn-warning" style="width:50%;">Manas ziņas</a></p>';
+            if (!isset($_SESSION['Abonements'])) {
+                echo '<p class="mb-2"><a href="abonementi.php" class="btn btn-info" style="width:50%;">Abonements</a></p>';
+            }
+        echo '
+            <p class="mb-2"><a href="logout.php" style="font-weight:bold; width:50%;" class="btn btn-outline-danger"><i class="fa-solid fa-arrow-right-from-bracket"></i> Iziet</a></p>
         ';
     }
 
@@ -142,6 +186,11 @@ function navbar($num = null, $kat = null) {
 function show_zinas($posts) {
   ?>
   <div class="container mt-5">
+    <div class="row">
+        <?php if (isset($_GET['savas_zinas'])): ?>
+            <h1 class="text-center text-black mb-5">Manas ziņas</h1>
+        <?php endif; ?>
+    </div>
         <div class="row">
             <?php
 $featuredIds = [];
@@ -305,34 +354,178 @@ function rediget_atsauksmi() {
       <form method="post">
         <input type="hidden" name="rediget_atsauksmi" id="modal_red_ats_id">
       <div class="modal-body" id="modal_red_ats_body" style="overflow-Y: auto;">
-        <?php if (
-    isset($_SESSION['Liet_ID'])
-): ?>
-            <div class="col-9">
-                <div class="form-outline mb-4" data-mdb-input-initialized="true" data-mdb-input-init="">
-                    <textarea id="red_ats_input" class="form-control" name="red_ats_input" rows="4" required></textarea>
-                    <label class="form-label" for="red_ats_input" style="margin-left: 0px;">Ievadi tekstu</label>
-                    <div class="form-notch">
-                        <div class="form-notch-leading" style="width: 9px;"></div>
-                        <div class="form-notch-middle" style="width: 112px;"></div>
-                        <div class="form-notch-trailing"></div>
-                    </div>
+        <?php if (isset($_SESSION['Liet_ID'])): ?>
+            <div class="form-outline mb-4" data-mdb-input-initialized="true" data-mdb-input-init="">
+                <textarea id="red_ats_input" class="form-control" name="red_ats_input" rows="4" required></textarea>
+                <label class="form-label" for="red_ats_input" style="margin-left: 0px;">Ievadi tekstu</label>
+                <div class="form-notch">
+                    <div class="form-notch-leading" style="width: 9px;"></div>
+                    <div class="form-notch-middle" style="width: 112px;"></div>
+                    <div class="form-notch-trailing"></div>
                 </div>
             </div>
-            <div class="col-3">
-                <button class="btn btn-success">Saglabāt</button>
+            <button class="btn btn-success">Saglabāt</button>
+        <?php else: ?>
+            <div class="col-12">
+                <h5 class="text-center"><a href="login.php">Piesakies kontā!</a></h5>
             </div>
-            <?php else: ?>
-                <div class="col-12">
-                    <h5 class="text-center"><a href="login.php">Piesakies kontā!</a></h5>
-                </div>
-            <?php endif; ?>
+        <?php endif; ?>
       </div>
     </form>
     </div>
   </div>
 </div>
 <?php
+}
+
+function positive_alert($alert_id, $teksts = '') {
+    
+    echo '
+    <div 
+        id="'.$alert_id.'"
+        class="alert alert-success fade position-fixed top-0 start-50 translate-middle-x d-none"
+        role="alert"
+        style="z-index: 2000; min-width: 300px; text-align:center; opacity: 0.9; margin-top: 80px;"
+    >
+        '.$teksts.'
+    </div>
+
+    <script>
+    const alertBox = document.getElementById("'.$alert_id.'");
+    alertBox.classList.remove("d-none");
+    alertBox.classList.add("show");
+    setTimeout(() => { alertBox.classList.remove("show");
+    setTimeout(() => { alertBox.classList.add("d-none"); }, 500); }, 5000); 
+    </script>
+    ';
+}
+
+function negative_alert($alert_id, $teksts = '') {
+    
+    echo '
+    <div 
+        id="'.$alert_id.'"
+        class="alert alert-danger fade position-fixed top-0 start-50 translate-middle-x d-none"
+        role="alert"
+        style="z-index: 2000; min-width: 300px; text-align:center; opacity: 0.9; margin-top: 80px;"
+    >
+        '.$teksts.'
+    </div>
+
+    <script>
+    const alertBox = document.getElementById("'.$alert_id.'");
+    alertBox.classList.remove("d-none");
+    alertBox.classList.add("show");
+    setTimeout(() => { alertBox.classList.remove("show");
+    setTimeout(() => { alertBox.classList.add("d-none"); }, 500); }, 5000); 
+    </script>
+    ';
+}
+
+function form_negative_alert($form_id, $alert_id, $teksts = '') {
+    
+    echo '
+    <div 
+        id="'.$alert_id.'"
+        class="alert alert-danger fade position-fixed top-0 start-50 translate-middle-x d-none"
+        role="alert"
+        style="z-index: 2000; min-width: 300px; text-align:center; opacity: 0.9; margin-top: 80px;"
+    >
+        '.$teksts.'
+    </div>
+
+    <script>
+
+    const alertBox = document.getElementById("'.$alert_id.'");
+
+    if ("'.$form_id.'" === "login_forma") {
+    ';
+
+    if (!empty($teksts)) {
+
+        echo '
+
+        alertBox.classList.remove("d-none");
+
+        setTimeout(() => {
+            alertBox.classList.add("show");
+        }, 10);
+
+        setTimeout(() => {
+
+            alertBox.classList.remove("show");
+
+            setTimeout(() => {
+                alertBox.classList.add("d-none");
+            }, 150);
+
+        }, 5000);
+
+        ';
+    }
+
+    echo '}
+
+    document.getElementById("'.$form_id.'").addEventListener("submit", function(e) {
+
+        let error = false;
+
+        if ("'.$form_id.'" === "register_forma") {
+
+            const vards = this.elements["Vards"].value.trim();
+            const epasts = this.elements["epasts"].value.trim();
+            const parole = this.elements["parole"].value;
+
+            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+
+            if (vards.length < 3 || vards.length > 30) {
+                error = true;
+            }
+
+            if (!emailRegex.test(epasts)) {
+                error = true;
+            }
+
+            if (parole.length < 8 || parole.length > 30) {
+                error = true;
+            }
+        }
+
+        if (error || !this.checkValidity()) {
+
+            if(alertBox.innerHTML.trim() === ""){
+                alertBox.innerHTML = "Lūdzu aizpildiet visus laukus!";
+            }
+
+            e.preventDefault();
+
+            alertBox.classList.remove("d-none");
+
+            setTimeout(() => {
+                alertBox.classList.add("show");
+            }, 10);
+
+            setTimeout(() => {
+
+                alertBox.classList.remove("show");
+
+                setTimeout(() => {
+                    alertBox.classList.add("d-none");
+                }, 150);
+
+            }, 5000);
+
+        } else {
+
+            alertBox.classList.remove("show");
+            alertBox.classList.add("d-none");
+
+        }
+
+    });
+
+    </script>
+    ';
 }
 
 ?>

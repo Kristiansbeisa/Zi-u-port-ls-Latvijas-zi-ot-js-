@@ -38,6 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['Vards'] = $username;
             $_SESSION['Liet_ID'] = $ID;
             $_SESSION['Loma']    = "Lietotājs";
+
+            $_SESSION['positive_alert_text'] = 'Jūsu konts tika izveidots!';
+
             header("Location: index.php");
             exit;
         }
@@ -52,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Reģistrācija</title>
     <link href="https://cdn.jsdelivr.net/npm/mdb-ui-kit@9.2.0/css/mdb.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" />
+    <link href="dizains.css" rel="stylesheet" />
 </head>
 <body>
 
@@ -59,25 +63,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         navbar();
     ?>
 
-    <div class="container mt-5">
+    <div class="container mt-5" style="max-width:700px;">
 
         <div class="row">
-            <div class="card">
+            <div class="col-12">
+            <div class="card shadow-6-strong">
                 <div class="card-header text-center">
-                    <h2>Pieteikšanās</h2>
+                    <h2>Reģistrācija</h2>
                 </div>
 
                 <div class="card-body text-center">
-                    <form method="post">
+                    <form id="register_forma" method="post" novalidate>
 
-                        <div class="form-outline mb-4" data-mdb-input-initialized="true" data-mdb-input-init="">
-                            <input type="text" class="form-control" name="Vards" required="">
+                        <?php form_negative_alert('register_forma', 'register_alert', 'Ievadītā lietotāja informācija neatbilst prasībām!')?>
+
+                        <div class="form-outline" data-mdb-input-initialized="true" data-mdb-input-init="">
+                            <input type="text" class="form-control" aria-describedby="Lietzemteksts" name="Vards" required="">
                             <label class="form-label" for="Vards" style="margin-left: 0px;">Lietotājvārds</label>
                             <div class="form-notch">
                                 <div class="form-notch-leading" style="width: 9px;"></div>
                                 <div class="form-notch-middle" style="width: 112px;"></div>
                                 <div class="form-notch-trailing"></div>
                             </div>
+                        </div>
+                        <div id="Lietzemteksts" class="form-text text-start mt-0 mb-4">
+                            Jāsastāv no 3 līdz 30 simboliem
                         </div>
 
                         <div class="form-outline mb-4" data-mdb-input-initialized="true" data-mdb-input-init="">
@@ -90,8 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
 
-                        <div class="form-outline mb-4" data-mdb-input-initialized="true" data-mdb-input-init="">
-                            <input type="password" class="form-control" name="parole" required="">
+                        <div class="form-outline" data-mdb-input-initialized="true" data-mdb-input-init="">
+                            <input type="password" class="form-control" aria-describedby="Parolezemteksts" name="parole" required="">
                             <label class="form-label" for="parole" style="margin-left: 0px;">Parole</label>
                             <div class="form-notch">
                                 <div class="form-notch-leading" style="width: 9px;"></div>
@@ -99,12 +109,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="form-notch-trailing"></div>
                             </div>
                         </div>
+                        <div id="Parolezemteksts" class="form-text text-start mt-0 mb-4">
+                            Jāsastāv no 8 līdz 30 simboliem
+                        </div>
 
 
                         <button type="submit" class="btn btn-primary">Piereģistrēties</button>
                     </form>
                 </div>
             </div>
+        </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/mdb-ui-kit@9.2.0/js/mdb.umd.min.js"></script>

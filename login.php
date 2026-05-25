@@ -15,8 +15,10 @@ try {
 
 session_start();
 
-$errors = [];
+$error = null;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $username = trim($_POST['Vards'] ?? '');
     $password = $_POST['parole'] ?? '';
 
@@ -24,15 +26,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$username, $username]);
     $user = $stmt->fetch();
 
-    if ($user && password_verify($password, $user['parole'])) {
+    if (!$user) {
+        $error = "Nepareizs lietotājvārds/e-pasts!";
+    }
+
+    elseif (!password_verify($password, $user['parole'])) {
+        $error = "Nepareiza parole!";
+    }
+
+    else {
         $_SESSION['Vards'] = $user['Vards'];
         $_SESSION['Liet_ID'] = $user['ID'];
-        $_SESSION['Loma']    = $user['Loma'];
+        $_SESSION['Loma'] = $user['Loma'];
+
+        $stmtsub = $pdo->prepare(" SELECT * FROM abonementi WHERE Liet_ID = ? AND Beigas >= CURDATE() ORDER BY Beigas DESC LIMIT 1 ");
+        $stmtsub->execute([$_SESSION['Liet_ID']]);
+        $abonements = $stmtsub->fetch();
+
+        if ($abonements) {
+            $_SESSION['Abonements'] = $abonements['Tips'];
+        } else {
+            $_SESSION['Abonements'] = null;
+        }
+
+        $_SESSION['positive_alert_text'] = 'Jūs pieteicāties kontā!';
+        
         header("Location: index.php");
         exit;
-    } else {
-        $errors[] = "Nepareizs lietotājvārds/e-pasts vai parole";
     }
+
 }
 ?>
 <!DOCTYPE html>
@@ -51,16 +73,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         navbar();
     ?>
 
-    <div class="container mt-5">
+    <div class="container mt-5" style="max-width:700px;">
 
         <div class="row">
-            <div class="card">
+            <div class="col-12">
+            <div class="card shadow-6-strong">
                 <div class="card-header text-center">
                     <h2>Pieteikšanās</h2>
                 </div>
 
                 <div class="card-body text-center">
-                    <form method="post">
+                    <form id="login_forma" method="post" novalidate>
+
+                        <?php form_negative_alert('login_forma', 'login_alert', $error); ?>
 
                         <div class="form-outline mb-4" data-mdb-input-initialized="true" data-mdb-input-init="">
                             <input type="text" class="form-control" name="Vards" required="">
@@ -87,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </form>
                 </div>
             </div>
+        </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/mdb-ui-kit@9.2.0/js/mdb.umd.min.js"></script>

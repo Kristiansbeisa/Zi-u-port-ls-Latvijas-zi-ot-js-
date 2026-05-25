@@ -11,9 +11,11 @@ try {
     die("DB connection failed: " . $e->getMessage());
 }
 
-session_start();       // jāstartē, lai piekļūtu esošajai sesijai
-session_unset();       // iztīra visus $_SESSION mainīgos
-session_destroy();     // pilnībā izdzēš sesiju
+session_start();
+session_unset();
+session_destroy();
+session_start();
+$_SESSION['negative_alert_text'] = 'Jūs izrakstījāties no konta!';
 header("Location: index.php");
 exit;
 ?>

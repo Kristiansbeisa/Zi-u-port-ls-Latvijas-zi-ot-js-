@@ -47,11 +47,27 @@ if (isset($_POST['action']) && $_POST['action'] == 'send') {
 }
 // Ziņas sūta
 
+// Ziņas dzēš
+if (isset($_POST['action']) && $_POST['action'] == 'delete') {
+
+    $tzinas_id = trim($_POST['ID']);
+
+    if ($tzinas_id != '') {
+        $stmt = $pdo->prepare("DELETE FROM terzetavas_zinas WHERE ID = ?");
+        $stmt->execute([$tzinas_id]);
+    }
+
+    exit;
+}
+// Ziņas dzēš
+
 // Ziņas ielādē
 if (isset($_GET['action']) && $_GET['action'] == 'load') {
 
     $stmt = $conn->prepare("SELECT
-                            t.*,
+                            t.ID AS tzinas_ID,
+                            t.teksts AS tzinas_teksts,
+                            t.izveidots AS tzinas_izveidots,
                             l.*
                             FROM terzetavas_zinas t
                             JOIN lietotaji l ON t.Liet_ID = l.ID
@@ -63,13 +79,17 @@ if (isset($_GET['action']) && $_GET['action'] == 'load') {
     $result = $stmt->get_result();
 
     while ($row = $result->fetch_assoc()) {
-        echo "<p>
+    echo "
+        <div class='d-flex justify-content-between'>
+            <div class=''><p>
                 <strong>" . htmlspecialchars($row['Vards']) . ":</strong>
-                <span style='word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: break-word;'>" . htmlspecialchars($row['teksts']) . "</span>
-                <br><small class='text-muted'>{$row['izveidots']}</small>
-              </p>";
+                <span style='word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;'>" . htmlspecialchars($row['tzinas_teksts']) . "</span>
+                <br><small class='text-muted'>{$row['tzinas_izveidots']}</small>
+            </p></div>
+            "; if (isset($_SESSION['Liet_ID']) && ($_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators')) { echo "
+            <div><button class='btn btn-danger' onclick='deletetzina(" . $row['tzinas_ID'] . ")'>X</button></div>
+            ";} echo "
+        </div>";
     }
 
     exit;
@@ -100,6 +120,25 @@ function sendtzina() {
     }) 
     .then(() => { 
         document.getElementById("tzina").value = ""; 
+        ieladettzinas(); 
+    }); 
+}
+
+function deletetzina(ID) { 
+
+    if (!confirm("Vai tiešām dzēst ziņu?")) {
+        return;
+    }
+    
+    fetch(window.location.pathname, { 
+        method: "POST", 
+        headers: { "Content-Type": "application/x-www-form-urlencoded" 
+
+    }, 
+        body: "action=delete&ID=" + 
+        encodeURIComponent(ID) 
+    }) 
+    .then(() => { 
         ieladettzinas(); 
     }); 
 }
