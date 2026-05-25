@@ -246,10 +246,12 @@ function openModal(id, teksts) {
         <div class="text-black">
         <?= nl2br(htmlspecialchars($zina['Teksts'])) ?>
         <?php if (isset($zina['Maksas_Teksts'])): 
-            if (isset($_SESSION['Abonements']) || in_array($_SESSION['Loma'], ['Darbinieks', 'Administrators'])):?>
-                <?= nl2br(htmlspecialchars($zina['Maksas_Teksts'])) ?>
-            <?php else: ?>
+            if (isset($_SESSION['Liet_id'])):
+                if (isset($_SESSION['Abonements']) || $_SESSION['Loma'] === 'Darbinieks' || $_SESSION['Loma'] === 'Administrators'):?>
+                    <?= nl2br(htmlspecialchars($zina['Maksas_Teksts'])) ?>
+                <?php else: ?>
                     <p style="margin-bottom: 150px;"><a href="abonementi.php">Iegādājaties abonementu</a>, lai turpinātu lasīt ziņu!</p>
+                <?php endif; ?>
             <?php endif; ?>
         <?php endif; ?>
         </div>
