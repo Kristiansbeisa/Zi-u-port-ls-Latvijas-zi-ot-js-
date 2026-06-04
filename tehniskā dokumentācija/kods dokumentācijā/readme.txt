@@ -1,0 +1,3 @@
+Ziņu portālu "Latvijas ziņotājs" nevar apskatīt darbībā, jo tas ir izstrādāts un tiek darbināts lokālajā serverī. Datu bāze arī atrodas lokālajā serverī un lietotāju pievienotie faili (attēli, video) tiek glabāti uz ierīces, kur tiek palaists lokālais serveris.
+
+Ziņu portālu "Latvijas ziņotājs" nevarēja publicēt tīmeklī, jo nevarēja atrast bezmaksas iespēju to izdarīt, lai tas darbotos ar PHP failiem,  MySQL datu bāzi un būtu iespēja glabāt failus, kurus lietotāji pievieno, to lietojot.
